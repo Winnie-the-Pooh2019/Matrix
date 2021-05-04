@@ -24,15 +24,6 @@ public:
         data = nullptr;
     }
 
-    // ~Iterator() {
-    //     cout << "!!! we are in iterator destructor !!!\n";
-
-    //     if (data != nullptr)
-    //         delete[] data;
-
-    //     data = nullptr;
-    // }
-
     T& operator [] (const ulli& index) {
         return data[index];
     }
@@ -46,6 +37,7 @@ public:
     ulli height;
     
     Matrix(ulli width, ulli height) {
+        cout << "!!! in constructor !!!\n";
         this->width = width;
         this->height = height;
 
@@ -77,14 +69,8 @@ public:
     }
 
     ~Matrix() {
-        // cout << "!!! we are in destructor !!!" << endl;
-
         if (values != nullptr) {
-            // cout << "!!! we are in if !!!\n";
-
             for (ulli i = 0; i < height; i++) {
-                // cout << "!!! " << i << " !!!\n";
-
                 delete[] values[i].data;
             }
 
@@ -121,16 +107,14 @@ public:
         return *this;
     }
 
-    Matrix<T> operator - () const {
-        Matrix<T> result = {width, height};
-
+    Matrix<T>& operator - () {
         for (ulli i = 0; i < height; i++) {
             for (ulli j = 0; j < width; j++) {
-                result[i][j] = -values[i][j];
+                values[i][j] = -values[i][j];
             }
         }
 
-        return result;
+        return *this;
     }
 
     Matrix<T>& operator += (Matrix<T>& source) {
@@ -226,30 +210,17 @@ private:
 
 template<typename T>
 Matrix<T> operator + (Matrix<T>& left, Matrix<T>& right) {
-    Matrix<T> result = Matrix<T>();
+    Matrix<T> result = {};
 
-    if (left.height != right.height || left.width != right.width)
+    if (left.height != right.height || left.width != right.width) {
         return  result;
-
-    result = Matrix<T>(left.width, right.height);
-    for (ulli i = 0; i < left.height; i++) {
-        for (ulli j = 0; j < left.width; j++) {
-            result[i][j] = left[i][j] + right[i][j];
-        }
     }
-    return result;
-}
 
-template<typename T>
-Matrix<T> operator + (const Matrix<T>& left, const Matrix<T>& right) {
-    Matrix<T> result = Matrix<T>();
+    result = {right.width, right.height};
 
-    if (left.height != right.height || left.width != right.width)
-        return  result;
-
-    result = Matrix<T>(left.width, right.height);
-    for (ulli i = 0; i < left.height; i++) {
-        for (ulli j = 0; j < left.width; j++) {
+    for (ulli i = 0; i < right.height; i++) {
+        
+        for (ulli j = 0; j < right.width; j++) {
             result[i][j] = left[i][j] + right[i][j];
         }
     }
@@ -258,16 +229,11 @@ Matrix<T> operator + (const Matrix<T>& left, const Matrix<T>& right) {
 
 template<typename T>
 Matrix<T> operator - (Matrix<T>& left, Matrix<T>& right) {
-    return (-right) + left;
-}
-
-template<typename T>
-Matrix<T> operator - (const Matrix<T>& left, const Matrix<T>& right) {
     return left + (-right);
 }
 
 template<typename T>
-Matrix<T> operator * (T& item, Matrix<T>& matrix) {
+Matrix<T> operator * (T&& item, Matrix<T>& matrix) {
     Matrix<T> result = {matrix.width, matrix.height};
     for (ulli i = 0; i < result.height; i++) {
         for (ulli j = 0; j < result.width; j++) {
