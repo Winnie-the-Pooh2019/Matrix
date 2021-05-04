@@ -37,7 +37,6 @@ public:
     ulli height;
     
     Matrix(ulli width, ulli height) {
-        cout << "!!! in constructor !!!\n";
         this->width = width;
         this->height = height;
 
@@ -158,7 +157,99 @@ public:
         return result;
     }
 
+    T minor(ulli currentH, ulli currentW, ulli mainH, ulli mainW) {
+        if (currentH >= height || currentW >= width || mainH >= height || mainW >= width)
+            return T();
+
+        return values[mainH][mainW] * values[currentH][currentW] - values[currentH][mainW] * values[mainH][currentW];
+    }
+
+    T determinat() {
+        Matrix<T> changed = gaussTransform();
+        return changed[height - 1][height - 1];
+    }
+
+    Matrix<T> equation() {
+        gaussTransform();
+
+        Matrix<T> result = {1, height};
+
+        for (ulli i = 0; i < height; i++)
+            result[i][0] = values[i][width - 1] / values[i][i];
+
+        return result;
+    }
+
+    Matrix<T> negativeMatrix() {
+        if (determinat() == 0)
+            return {};
+
+        Matrix<T> result = *this;
+        result.resizeW(height);
+
+        for (ulli i = 0; i < result.height; i++) {
+            for (ulli j = result.height; j < result.width; j++) {
+                if (j - result.height == i)
+                    result[i][j] = 1;
+                else
+                    result[i][j] = 0;
+            }
+        }
+
+        result = result.gaussTransform();
+
+        Matrix<T> r = {result.height, result.height};
+
+        for (ulli i = 0; i < result.height; i++) {
+            for (ulli j = 0; j < result.height; j++) {
+                r[i][j] = result[i][j + height] / result[i][i];
+            }
+        }
+
+        return r;
+    }
+
+    Matrix<T> gaussTransform() {
+        Matrix<T> result = *this;
+
+        T det = result[0][0] / result[0][0];
+
+        for (ulli i = 0; i < result.height; i++) {
+            Matrix<T> buff = result;
+
+            for (ulli h = 0; h < result.height; h++) {
+                if (h != i) {
+                    T current;
+
+                    for (ulli w = 0; w < result.width; w++) {
+                        current = result[i][i] * result[h][w];
+                        current -= result[h][i] * result[i][w];
+
+                        buff[h][w] = current / det;
+                    }
+                }
+            }
+
+            result = buff;
+            det = result[i][i];
+        }
+
+        return result;
+    }
+
+    
+
 private:
+    void echoo() {
+        for (ulli i = 0; i < height; i++) {
+            for (ulli j = 0; j < width; j++) {
+                cout << " " << values[i][j];
+            }
+
+            cout << endl;
+        }
+    }
+
     bool resize(ulli deltaH, ulli deltaW) {
         return resizeH(deltaH) && resizeW(deltaW);
     }
@@ -251,6 +342,7 @@ Matrix<T> operator * (const T& item, Matrix<T>& matrix) {
             result[i][j] = item * matrix[i][j];
         }
     }
+
     return result;
 }
 
@@ -269,5 +361,6 @@ Matrix<T> operator * (Matrix<T>& left, Matrix<T>& right) {
             }
         }
     }
+
     return result;
 }
