@@ -2,9 +2,10 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <cstring>
+#include <cmath>
 
-typedef unsigned long long int ulli;
-typedef long long int loli;
+typedef unsigned int uint;
 
 using namespace std;
 
@@ -12,9 +13,9 @@ template<typename T>
 struct Iterator {
 public:
     T* data;
-    ulli capacity;
+    uint capacity;
 
-    Iterator(ulli capacity) {
+    Iterator(uint capacity) {
         this->capacity = capacity;
         data = new T[capacity];
     }
@@ -24,7 +25,7 @@ public:
         data = nullptr;
     }
 
-    T& operator [] (const ulli& index) {
+    T& operator [] (const uint& index) {
         return data[index];
     }
 };
@@ -33,16 +34,16 @@ template<typename T>
 struct Matrix {
 public:
     Iterator<T>* values;
-    ulli width;
-    ulli height;
+    uint width;
+    uint height;
     
-    Matrix(ulli width, ulli height) {
+    Matrix(uint width, uint height) {
         this->width = width;
         this->height = height;
 
         values = new Iterator<T>[height];
 
-        for (ulli i = 0; i < height; i++) {
+        for (uint i = 0; i < height; i++) {
             values[i] = {width};
         }
     }
@@ -58,10 +59,10 @@ public:
         this->width = original.width;
 
         values = new Iterator<T>[height];
-        for (ulli i = 0; i < height; i++) {
+        for (uint i = 0; i < height; i++) {
             values[i] = {width};
 
-            for (ulli j = 0; j < width; j++) {
+            for (uint j = 0; j < width; j++) {
                 values[i][j] = original.values[i][j];
             }
         }
@@ -69,7 +70,7 @@ public:
 
     ~Matrix() {
         if (values != nullptr) {
-            for (ulli i = 0; i < height; i++) {
+            for (uint i = 0; i < height; i++) {
                 delete[] values[i].data;
             }
 
@@ -94,10 +95,10 @@ public:
         if (height != 0 && width != 0) {
             values = new Iterator<T>[height];
 
-            for (ulli i = 0; i < height; i++) {
+            for (uint i = 0; i < height; i++) {
                 values[i] = {width};
 
-                for (ulli j = 0; j < width; j++) {
+                for (uint j = 0; j < width; j++) {
                     values[i][j] = source.values[i][j];
                 }
             }
@@ -107,8 +108,8 @@ public:
     }
 
     Matrix<T>& operator - () {
-        for (ulli i = 0; i < height; i++) {
-            for (ulli j = 0; j < width; j++) {
+        for (uint i = 0; i < height; i++) {
+            for (uint j = 0; j < width; j++) {
                 values[i][j] = -values[i][j];
             }
         }
@@ -136,18 +137,18 @@ public:
         return *this;
     }
 
-    Iterator<T>& operator [] (const ulli& hindex) const {
+    Iterator<T>& operator [] (const uint& hindex) const {
         return values[hindex];
     }
 
-    static const Matrix<T>& fromArray(T** pointer, ulli height, ulli width) {
+    static const Matrix<T>& fromArray(T** pointer, uint height, uint width) {
         Matrix<T> result = {width, height};
 
         if (pointer == nullptr)
             return result;
 
-        for (ulli i = 0; i < height; i++) {
-            for (ulli j = 0; j < width; j++) {
+        for (uint i = 0; i < height; i++) {
+            for (uint j = 0; j < width; j++) {
                 result[i][j] = pointer[i][j];
             }
         }
@@ -157,7 +158,7 @@ public:
         return result;
     }
 
-    T minor(ulli currentH, ulli currentW, ulli mainH, ulli mainW) {
+    T minor(uint currentH, uint currentW, uint mainH, uint mainW) {
         if (currentH >= height || currentW >= width || mainH >= height || mainW >= width)
             return T();
 
@@ -170,14 +171,68 @@ public:
     }
 
     Matrix<T> equation() {
-        gaussTransform();
+        Matrix<T> transformed = gaussTransform();
 
         Matrix<T> result = {1, height};
 
-        for (ulli i = 0; i < height; i++)
-            result[i][0] = values[i][width - 1] / values[i][i];
+        for (uint i = 0; i < height; i++)
+            result[i][0] = transformed[i][width - 1] / transformed[i][i];
 
         return result;
+    }
+
+    Matrix<string> eequation() {
+        Matrix<T> changed = gaussTransform();
+        changed.zip();
+
+        if (!changed.isJoint()) {
+            cout << "!!! NOT JOINT !!!\n";
+            return {};
+        }
+
+        Matrix<string> answers = {1, changed.width - 1};
+
+        for (uint i = 0; i < changed.width - 1; i++)
+            answers[i][0] = "-";
+        
+        for (uint i = 0; i < changed.width - 1; i++) {
+            cout << "\n!!! NOW I = " << i << endl; 
+
+            int first = -1;
+
+            if (i < changed.height) {
+                for (uint j = i; j < changed.width - 1; j++) {
+                    if (first == -1 && changed[i][j] == 0 && answers[j][0] == "-") {
+                        answers[j][0] = "x" + to_string(j + 1);
+                    }
+                    if (changed[i][j] != 0 && first == -1 && answers[j][0] == "-") {
+                        first = j;
+
+                        answers[j][0] = (changed[i][width - 1] != 0) 
+                            ? to_string(changed[i][width - 1] / changed[i][j]) + " "
+                            : "";
+
+                        for (uint k = j + 1; k < changed.width - 1; k++) {
+                            if (changed[i][k] != 0) {
+                                T pc = changed[i][k] / changed[i][j];
+
+                                answers[j][0] += (pc > 0) ? " - " : " + ";
+                                answers[j][0] +=  to_string(fabs(pc));
+                                answers[j][0] += " * x" + to_string(k + 1) + " ";
+                            }
+                        }
+                    }
+
+                    cout << "!!! ANSWERS = " << answers[j][0] << endl;
+                }
+            }
+            else {
+                if (answers[i][0] == "-")
+                    answers[i][0] = "x" + to_string(i + 1);
+            }
+        }
+
+        return answers;
     }
 
     Matrix<T> negativeMatrix() {
@@ -187,8 +242,8 @@ public:
         Matrix<T> result = *this;
         result.resizeW(height);
 
-        for (ulli i = 0; i < result.height; i++) {
-            for (ulli j = result.height; j < result.width; j++) {
+        for (uint i = 0; i < result.height; i++) {
+            for (uint j = result.height; j < result.width; j++) {
                 if (j - result.height == i)
                     result[i][j] = 1;
                 else
@@ -200,8 +255,8 @@ public:
 
         Matrix<T> r = {result.height, result.height};
 
-        for (ulli i = 0; i < result.height; i++) {
-            for (ulli j = 0; j < result.height; j++) {
+        for (uint i = 0; i < result.height; i++) {
+            for (uint j = 0; j < result.height; j++) {
                 r[i][j] = result[i][j + height] / result[i][i];
             }
         }
@@ -212,37 +267,153 @@ public:
     Matrix<T> gaussTransform() {
         Matrix<T> result = *this;
 
-        T det = result[0][0] / result[0][0];
+        T det = 1;
 
-        for (ulli i = 0; i < result.height; i++) {
+        cout << "!!! det = " << det << endl;
+
+        uint j = 0;
+        for (uint i = 0; i < result.height; i++) {
+            
+
+
+            if (result[i][j] == 0) {
+                uint jj = j;
+
+                while (result[i][jj] == 0) {
+                    int goodRow = result.findNotNullRow(i, jj);
+
+                    cout << "!!! column = " << jj << endl;
+                    
+                    cout << "!!! godrow = " << goodRow << endl;
+
+                    if (goodRow != -1) {
+                        result.switcherH(i, (uint) goodRow);
+                        j = jj;
+
+                        break;
+                    }
+                    else {
+                        if (jj < result.width - 2)
+                            jj++;
+                        else
+                            break;
+                    }
+                }
+
+                j = jj;
+            }
+
+            result.echoo();
+            cout << "i = " << i << " j = " << j << endl;
+
             Matrix<T> buff = result;
 
-            for (ulli h = 0; h < result.height; h++) {
-                if (h != i) {
-                    T current;
+            cout << "current element = " << buff[i][j] << endl;
 
-                    for (ulli w = 0; w < result.width; w++) {
-                        current = result[i][i] * result[h][w];
-                        current -= result[h][i] * result[i][w];
+            if (result[i][j] != 0) {
+                for (uint h = 0; h < result.height; h++) {
+                    cout << "   h = " << h << endl;
 
-                        buff[h][w] = current / det;
+                    if (h != i) {
+                        T current;
+
+                        for (uint w = 0; w < result.width; w++) {
+                            cout << "       w = " << w << endl;
+
+                            current = result[i][j] * result[h][w];
+                            current -= result[h][j] * result[i][w];
+
+                            buff[h][w] = current / det;
+
+                            cout << "           new one = " << buff[h][w] << endl;
+                        }
                     }
                 }
             }
 
             result = buff;
-            det = result[i][i];
+            det = result[i][j];
+
+            j = (j < result.width - 2) ? j + 1 : j;
         }
 
         return result;
     }
 
-    
+    bool isJoint() {
+        bool result = true;
 
-private:
+        for (uint i = 0; i < height; i++) {
+            cout << "!!! i before = " << i << endl;
+            bool isRight = values[i][width - 1] != 0;
+            bool isLeft = false;
+
+            for (uint j = 0; j < width - 1; j++) {
+                if (values[i][j] != 0)
+                    isLeft = values[i][j] != 0;
+            }
+
+            // if (!(isLeft || isRight)) {
+            //     switcherH(i, height - 1);
+            //     resizeH(-1);
+            // }
+
+            cout << "!!! !isLeft && isRight = " << (!isLeft && isRight) << endl;
+            cout << "!!! last = " << (values[i][width - 1] != 0) << endl;
+            echoo();
+            cout << "!!! i after = " << i << endl;
+            if (!isLeft && isRight)
+                return false;
+            else
+                result = true;
+        }
+
+        return result;
+    }
+
+    void zip() {
+        cout << "!!! in zip\n";
+
+
+        for (uint i = 0; i < height; i++) {
+
+            bool notEmpty = false;
+
+            for (uint j = 0; j < width; j++) {
+                if (values[i][j] == -0) {
+                    cout << "!!! ZERO INDEXES : " << i << " " << j << endl;
+                }
+                if (values[i][j] != 0 && values[i][j] != -0)
+                    notEmpty = true;
+            }
+
+            if (!notEmpty) {
+                cout << "!!! EMPTY\n"; 
+                switcherH(i, height - 1);
+                resizeH(-1);
+            }
+        }
+
+        // notEmpty = false;
+
+        // for (uint j = 0; j < width; j++) {
+        //     for (uint i = 0; i < height; i++) {
+        //         if (values[i][j] != 0)
+        //             notEmpty = true;
+        //     }
+
+        //     if (!notEmpty) {
+        //         //switcherW(j, width - 1);
+        //         shiftRightWidth(j);
+        //         resizeW(-1);
+        //     }
+        // }
+    }
+
+//private:
     void echoo() {
-        for (ulli i = 0; i < height; i++) {
-            for (ulli j = 0; j < width; j++) {
+        for (uint i = 0; i < height; i++) {
+            for (uint j = 0; j < width; j++) {
                 cout << " " << values[i][j];
             }
 
@@ -250,26 +421,26 @@ private:
         }
     }
 
-    bool resize(ulli deltaH, ulli deltaW) {
+    bool resize(uint deltaH, uint deltaW) {
         return resizeH(deltaH) && resizeW(deltaW);
     }
 
-    bool resizeH(loli delta) {
+    bool resizeH(int delta) {
         if (delta + height <= 0 || delta == 0)
             return false;
 
         Iterator<T>* newP = new Iterator<T>[height + delta];
 
-        for (ulli i = 0; i < (delta > 0 ? height : height + delta); i++) {
+        for (uint i = 0; i < (delta > 0 ? height : height + delta); i++) {
             newP[i] = {width};
 
-            for (loli j = 0; j < width; j++) {
+            for (int j = 0; j < width; j++) {
                 newP[i][j] = values[i][j];
             }
         }
 
-        for (ulli i = height; i < (delta > 0 ? height + delta : height); i++)
-            newP = {width};
+        for (uint i = height; i < (delta > 0 ? height + delta : height); i++)
+            newP[i] = {width};
 
         height += delta;
         free(values);
@@ -278,16 +449,16 @@ private:
         return true;
     }
 
-    bool resizeW(loli delta) {
+    bool resizeW(int delta) {
         if (delta + width <= 0 || delta == 0)
             return false;
 
         Iterator<T>* newP = new Iterator<T>[height];
 
-        for (ulli i = 0; i < height; i++) {
+        for (uint i = 0; i < height; i++) {
             newP[i] = {width + delta};
 
-            for (ulli j = 0; j < (delta > 0 ? width : delta + width); j++)
+            for (uint j = 0; j < (delta > 0 ? width : delta + width); j++)
                 newP[i][j] = values[i][j];
         }
 
@@ -296,6 +467,44 @@ private:
         width += delta;
 
         return true;
+    }
+
+    int findNotNullRow(uint h, uint w) {
+        for (uint i = h + 1; i < height; i++) {
+            if (values[i][w] != 0)
+                return i;
+        }
+
+        return -1;
+    }
+
+    void switcherH(uint row1, uint row2) {
+        cout << "!!! in switcherH !!!" << endl;
+        T temp;
+
+        for (uint i = 0; i < width; i++) {
+            temp = values[row1][i];
+            values[row1][i] = values[row2][i];
+            values[row2][i] = temp;
+        }
+    }
+
+    void switcherW(uint column1, uint column2) {
+        T temp;
+
+        for (uint i = 0; i < height; i++) {
+            temp = values[i][column1];
+            values[i][column1] = values[i][column2];
+            values[i][column2] = temp;
+        }
+    }
+
+    void shiftRightWidth(uint nullColumn) {
+        for (uint w = nullColumn + 1; w < width; w++) {
+            for (uint h = 0; h < height; h++) {
+                values[h][w - 1] = values[h][w];
+            }
+        }
     }
 };
 
@@ -309,9 +518,9 @@ Matrix<T> operator + (Matrix<T>& left, Matrix<T>& right) {
 
     result = {right.width, right.height};
 
-    for (ulli i = 0; i < right.height; i++) {
+    for (uint i = 0; i < right.height; i++) {
         
-        for (ulli j = 0; j < right.width; j++) {
+        for (uint j = 0; j < right.width; j++) {
             result[i][j] = left[i][j] + right[i][j];
         }
     }
@@ -326,8 +535,8 @@ Matrix<T> operator - (Matrix<T>& left, Matrix<T>& right) {
 template<typename T>
 Matrix<T> operator * (T&& item, Matrix<T>& matrix) {
     Matrix<T> result = {matrix.width, matrix.height};
-    for (ulli i = 0; i < result.height; i++) {
-        for (ulli j = 0; j < result.width; j++) {
+    for (uint i = 0; i < result.height; i++) {
+        for (uint j = 0; j < result.width; j++) {
             result[i][j] = item * matrix[i][j];
         }
     }
@@ -337,8 +546,8 @@ Matrix<T> operator * (T&& item, Matrix<T>& matrix) {
 template<typename T>
 Matrix<T> operator * (const T& item, Matrix<T>& matrix) {
     Matrix<T> result = {matrix.width, matrix.height};
-    for (ulli i = 0; i < result.height; i++) {
-        for (ulli j = 0; j < result.width; j++) {
+    for (uint i = 0; i < result.height; i++) {
+        for (uint j = 0; j < result.width; j++) {
             result[i][j] = item * matrix[i][j];
         }
     }
@@ -352,11 +561,11 @@ Matrix<T> operator * (Matrix<T>& left, Matrix<T>& right) {
         return {};
 
     Matrix<T> result {right.width, left.height};
-    for (ulli i = 0; i < result.height; i++) {
-        for (ulli j = 0; j < result.width; j++) {
+    for (uint i = 0; i < result.height; i++) {
+        for (uint j = 0; j < result.width; j++) {
             result[i][j] = left[i][0] * right[0][j];
 
-            for (ulli k = 1; k < right.height; k++) {
+            for (uint k = 1; k < right.height; k++) {
                 result[i][j] += left[i][k] * right[k][j];
             }
         }
