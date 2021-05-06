@@ -166,6 +166,9 @@ public:
     }
 
     T determinat() {
+        if (height != width)
+            return 0;
+
         Matrix<T> changed = gaussTransform();
         return changed[height - 1][height - 1];
     }
@@ -175,7 +178,7 @@ public:
         changed.zip();
 
         if (!changed.isJoint()) {
-            cout << "!!! NOT JOINT !!!\n";
+            // cout << "!!! NOT JOINT !!!\n";
             return {};
         }
 
@@ -185,7 +188,7 @@ public:
             answers[i][0] = "-";
         
         for (uint i = 0; i < changed.width - 1; i++) {
-            cout << "\n!!! NOW I = " << i << endl; 
+            // cout << "\n!!! NOW I = " << i << endl; 
 
             int first = -1;
 
@@ -215,7 +218,7 @@ public:
                             answers[j][0] = "0";
                     }
 
-                    cout << "!!! ANSWERS = " << answers[j][0] << endl;
+                    // cout << "!!! ANSWERS = " << answers[j][0] << endl;
                 }
             }
             else {
@@ -261,7 +264,7 @@ public:
 
         T det = 1;
 
-        cout << "!!! det = " << det << endl;
+        // cout << "!!! det = " << det << endl;
 
         uint j = 0;
         for (uint i = 0; i < result.height; i++) {
@@ -274,9 +277,9 @@ public:
                 while (result[i][jj] == 0) {
                     int goodRow = result.findNotNullRow(i, jj);
 
-                    cout << "!!! column = " << jj << endl;
+                    // cout << "!!! column = " << jj << endl;
                     
-                    cout << "!!! godrow = " << goodRow << endl;
+                    // cout << "!!! godrow = " << goodRow << endl;
 
                     if (goodRow != -1) {
                         result.switcherH(i, (uint) goodRow);
@@ -295,29 +298,29 @@ public:
                 j = jj;
             }
 
-            result.echoo();
-            cout << "i = " << i << " j = " << j << endl;
+            // result.echoo();
+            // cout << "i = " << i << " j = " << j << endl;
 
             Matrix<T> buff = result;
 
-            cout << "current element = " << buff[i][j] << endl;
+            // cout << "current element = " << buff[i][j] << endl;
 
             if (result[i][j] != 0) {
                 for (uint h = 0; h < result.height; h++) {
-                    cout << "   h = " << h << endl;
+                    // cout << "   h = " << h << endl;
 
                     if (h != i) {
                         T current;
 
                         for (uint w = 0; w < result.width; w++) {
-                            cout << "       w = " << w << endl;
+                            // cout << "       w = " << w << endl;
 
                             current = result[i][j] * result[h][w];
                             current -= result[h][j] * result[i][w];
 
                             buff[h][w] = current / det;
 
-                            cout << "           new one = " << buff[h][w] << endl;
+                            // cout << "           new one = " << buff[h][w] << endl;
                         }
                     }
                 }
@@ -336,7 +339,7 @@ public:
         bool result = true;
 
         for (uint i = 0; i < height; i++) {
-            cout << "!!! i before = " << i << endl;
+            // cout << "!!! i before = " << i << endl;
             bool isRight = values[i][width - 1] != 0;
             bool isLeft = false;
 
@@ -345,10 +348,10 @@ public:
                     isLeft = values[i][j] != 0;
             }
 
-            cout << "!!! !isLeft && isRight = " << (!isLeft && isRight) << endl;
-            cout << "!!! last = " << (values[i][width - 1] != 0) << endl;
-            echoo();
-            cout << "!!! i after = " << i << endl;
+            // cout << "!!! !isLeft && isRight = " << (!isLeft && isRight) << endl;
+            // cout << "!!! last = " << (values[i][width - 1] != 0) << endl;
+            // echoo();
+            // cout << "!!! i after = " << i << endl;
             if (!isLeft && isRight)
                 return false;
             else
@@ -359,7 +362,7 @@ public:
     }
 
     void zip() {
-        cout << "!!! in zip\n";
+        // cout << "!!! in zip\n";
 
 
         for (uint i = 0; i < height; i++) {
@@ -368,14 +371,14 @@ public:
 
             for (uint j = 0; j < width; j++) {
                 if (values[i][j] == -0) {
-                    cout << "!!! ZERO INDEXES : " << i << " " << j << endl;
+                    // cout << "!!! ZERO INDEXES : " << i << " " << j << endl;
                 }
                 if (values[i][j] != 0 && values[i][j] != -0)
                     notEmpty = true;
             }
 
             if (!notEmpty) {
-                cout << "!!! EMPTY\n"; 
+                // cout << "!!! EMPTY\n"; 
                 switcherH(i, height - 1);
                 resizeH(-1);
             }
@@ -450,7 +453,7 @@ public:
     }
 
     void switcherH(uint row1, uint row2) {
-        cout << "!!! in switcherH !!!" << endl;
+        // cout << "!!! in switcherH !!!" << endl;
         T temp;
 
         for (uint i = 0; i < width; i++) {

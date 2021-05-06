@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include <iostream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -37,177 +38,195 @@ Matrix<double> hilbertMatrixEquation(uint h) {
     return result;
 }
 
-int main() {
-    int h, w, hh, ww;
-    // cout << "input capacity of the first matrix\n";
-    // cin >> h >> w;
+void excep(Matrix<double>& equation) {
+    Matrix<double> a = equation;
+    a.resizeW(-1);
+    Matrix<string> sanswers = equation.equation();
+    
+    //sanswers.echoo();
 
-    //Matrix<double> m1 = {(unsigned int)w, (unsigned int) h};
+    if (a.determinat() != 0) {
+        Matrix<double> answers = {sanswers.width, sanswers.height};
 
-    // cout << "input values\n";
-    // for (int i = 0; i < h; i++) {
-    //     for (int j = 0; j < w; j++) {
-    //         m1[i][j] = j + 1;
-    //         cout << " m1[" << i << "][" << j << "] = " << m1[i][j] << " ";
-    //     }
-    //     cout << "\n";
-    // }
-
-    // cout << "input capacity of the second matrix\n";
-    // cin >> hh >> ww;
-
-    // Matrix<double> m2 = {(unsigned long long int)ww, (unsigned long long int) hh};
-
-    // cout << "input values\n";
-    // for (int i = 0; i < hh; i++) {
-    //     for (int j = 0; j < ww; j++) {
-    //         m2[i][j] = j + 1;
-    //     }
-    // }
-
-    // m1 += m2;
-    // m1 -= m2;
-    // m1 = -m1;
-
-    // m1 *= m2;
-    // m1 *= -1.0;
-
-
-    // cout << "input capacity of the second matrix\n";
-    cin >> hh >> ww;
-    Matrix<double> m1 = {(unsigned int)ww, (unsigned int) hh};
-    //cout << "input values\n";
-    for (int i = 0; i < hh; i++) {
-        for (int j = 0; j < ww; j++) {
-            cin >> m1[i][j];
+        for (uint i = 0; i < answers.height; i++) {
+            answers[i][0] = atof(sanswers[i][0].c_str());
         }
+
+        Matrix<double> b1 = a * answers;
+        Matrix<double> b2 = equation;
+        b2.switcherW(equation.width - 1, 0);
+        b2.resizeW(b2.width - 1);
+
+        double max = 0;
+        for (uint i = 0; i < b1.height; i++) {
+            if (fabs(b1[i][0] - b2[i][0]) > max)
+                max = fabs(b1[i][0] - b2[i][0]);
+        }
+
+        cout << "\ninfelicity = " << max << endl;
     }
 
-    echo(m1);
+    cout << "\nanswers = \n";
+    sanswers.echoo();
+}
 
-    // cout << m1.determinat() << endl;
-    // m1 = m1.gaussTransform();
-    // m1.echoo();
+int main() {
+    srand(time(NULL));
+    // first matrix
+    cout << "\nMATRIX 1:\n";
 
-    cout << "!!! isJoint = " << m1.isJoint() << endl;
+    Matrix<double> ex = {4, 3};
 
-    Matrix<string> answer = m1.equation();
+    ex[0][0] = 2; ex[0][1] = -1; ex[0][2] = 1; ex[0][3] = 2;
+    ex[1][0] = 1; ex[1][1] = -1; ex[1][2] = 1; ex[1][3] = -1;
+    ex[2][0] = 1; ex[2][1] = -1; ex[2][2] = 2; ex[2][3] = -5;
+    ex.echoo();
+    cout << endl;
 
-    answer.echoo();
+    // first task
+    cout << "\nTASK 1\n";
+    excep(ex);
 
-    m1 = hilbertMatrixEquation(4);
+    // second task
+    cout << "\nTASK 2\n";
+    ex.resizeW(-1);
+    double det = ex.determinat();
+    cout << "\ndeterminant = " << det << endl;
 
-    answer = m1.equation();
+    // third task
+    cout << "\nTASK 3\n";
+    ex = ex.negativeMatrix();
+    if (det != 0) {
+        cout << "\nnegative matrix:\n";
+        ex.echoo();
+    }
+    else {
+        cout << "\nnegative matrix doesn't exist\n";
+    }
 
-    answer.echoo();
+
+    // random generated matrix
+    cout << "\nRANDON GENERATED MATRIX:\n";
+    ex = {4, 3};
+    for (uint i = 0; i < ex.height; i++) {
+        for (uint j = 0; j < ex.width; j++) {
+            ex[i][j] = (double) (rand() % 10000) / 1000 - 4;
+        }
+    }
+    ex.echoo();
+
+    // task1
+    cout << "\nTASK 1\n";
+    excep(ex);
+
+    // second task
+    cout << "\nTASK 2\n";
+    ex.resizeW(-1);
+    det = ex.determinat();
+    cout << "\ndeterminat = " << det << endl;
+
+    // third task
+    cout << "\nTASK 3\n";
+    ex = ex.negativeMatrix();
+    if (det != 0) {
+        cout << "\nnegative matrix:\n";
+        ex.echoo();
+    }
+    else {
+        cout << "\nnegative matrix doesn't exist\n";
+    }
+
+
+    // 1-matrix
+    cout << "\nIDENTITY MATRIX\n";
+    ex = {4, 3};
+    ex[0][0] = 1; ex[0][1] = 0; ex[0][2] = 0; ex[0][3] = 2;
+    ex[1][0] = 0; ex[1][1] = 1; ex[1][2] = 0; ex[1][3] = -1;
+    ex[2][0] = 0; ex[2][1] = 0; ex[2][2] = 1; ex[2][3] = -5;
+    ex.echoo();
+
+    // first task
+    cout << "\nTASK 1\n";
+    excep(ex);
+
+    // second task
+    cout << "\nTASK 2\n";
+    ex.resizeW(-1);
+    det = ex.determinat();
+    cout << "\ndeterminant = " << det << endl;
+
+    // third task
+    cout << "\nTASK 3\n";
+    ex = ex.negativeMatrix();
+    if (det != 0) {
+        cout << "\nnegative matrix:\n";
+        ex.echoo();
+    }
+    else {
+        cout << "\nnegative matrix doesn't exist\n";
+    }
+
+
+    // forth matrix
+    cout << "\nDEGERATIVE MATRIX\n";
+    ex = {4, 3};
+    ex[0][0] = 1; ex[0][1] = 1; ex[0][2] = -1; ex[0][3] = 1;
+    ex[1][0] = 2; ex[1][1] = -1; ex[1][2] = 5; ex[1][3] = 3;
+    ex[2][0] = 3; ex[2][1] = 0; ex[2][2] = 4; ex[2][3] = 4;
+    ex.echoo();
+
+    // first task
+    cout << "\nTASK 1\n";
+    excep(ex);
+
+    // second task
+    cout << "\nTASK 2\n";
+    ex.resizeW(-1);
+    det = ex.determinat();
+    cout << "\ndeterminant = " << det << endl;
+
+    // third task
+    cout << "\nTASK 3\n";
+    ex = ex.negativeMatrix();
+    if (det != 0) {
+        cout << "\nnegative matrix:\n";
+        ex.echoo();
+    }
+    else {
+        cout << "\nnegative matrix doesn't exist\n";
+    }
+
+
+    // Hilbert Matrix
+    cout << "\nHILBERT MATRIX\n";
+    ex = {4, 3};
+    ex = hilbertMatrix(ex.height);
+    ex.resizeW(1);
+    for (uint i = 0; i < ex.height; i++) {
+        ex[i][ex.width - 1] = (double) (rand() % 10000) / 1000 - 4;
+    }
+    ex.echoo();
+
+    // task 1
+    cout << "\nTASK 1\n";
+    excep(ex);
+
+    // task 2
+    cout << "\nTASK 2\n";
+    ex.resizeW(-1);
+    det = ex.determinat();
+    cout << "\ndeterminat = " << det << endl;
+
+    // third task
+    cout << "\nTASK 3\n";
+    ex = ex.negativeMatrix();
+    if (det != 0) {
+        cout << "\nnegative matrix:\n";
+        ex.echoo();
+    }
+    else {
+        cout << "\nnegative matrix doesn't exist\n";
+    }
 
     return 0;
 }
-
-
-
-// int n, i, j, k;
-
-// double d, s;
-
-//  int main()
-
-// {
-
-// cout << "Poryadok: " << endl;
-
-// cin >> n;
-
-// double **a = new double *[n];
-
-// for (i = 0; i <= n; i++)
-
-// a[i] = new double [n];
-
-// double **a1 = new double *[n];
-
-// for (i = 0; i <= n; i++)
-
-// a1[i] = new double [n];
-
-// double *b = new double [n];
-
-// double *x = new double [n];
-
-// cout << "Vvedite koefficienty i svobodnye chleny " << endl;
-
-// for (i = 1; i <= n; i++)
-
-// {
-
-// for (j = 1; j <= n; j++)
-
-// {
-
-// cout << "a[ " << i << "," << j << "]= ";
-
-// cin >> a[i][j];
-
-// a1[i][j] = a[i][j];
-
-// }
-
-// cout << "b,[ " << i << "]= ";
-
-// cin >> b[i];
-
-// }
-
-// for (k = 1; k <= n; k++) // прямой ход
-
-// {
-
-// for (j = k + 1; j <= n; j++)
-
-// {
-
-// d = a[j][k] / a[k][k]; // формула (1)
-
-// for (i = k; i <= n; i++)
-
-// {
-
-// a[j][i] = a[j][i] - d * a[k][i]; // формула (2)
-
-// }
-
-// b[j] = b[j] - d * b[k]; // формула (3)
-
-// }
-
-// }
-
-// for (k = n; k >= 1; k--) // обратный ход
-
-// {
-
-// d = 0;
-
-// for (j = k + 1; j <= n; j++)
-
-// {
-
-// s = a[k][j] * x[j]; // формула (4)
-
-// d = d + s; // формула (4)
-
-// }
-
-// x[k] = (b[k] - d) / a[k][k]; // формула (4)
-
-// }
-
-// cout << "Korni sistemy: " << endl;
-
-// for( i = 1; i <= n; i++)
-
-// cout << "x[" << i << "]=" << x[i] << " " << endl;
-
-// return 0;
-
-// }
