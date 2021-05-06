@@ -13,6 +13,30 @@ inline void echo(Matrix<double>& mat) {
     }
 }
 
+Matrix<double> hilbertMatrix(uint h) {
+    Matrix<double> result = {h, h};
+
+    for (uint i = 0; i < h; i++) {
+        for (uint j = 0; j < h; j++) {
+            result[i][j] = 1.0 / (i + j + 1);
+        }
+    }
+
+    return result;
+}
+
+Matrix<double> hilbertMatrixEquation(uint h) {
+    Matrix<double> result = hilbertMatrix(h);
+
+    result.resizeW(1);
+
+    for (uint i = 0; i < result.height; i++) {
+        result[i][result.width - 1] = 0;
+    }
+
+    return result;
+}
+
 int main() {
     int h, w, hh, ww;
     // cout << "input capacity of the first matrix\n";
@@ -67,7 +91,13 @@ int main() {
 
     cout << "!!! isJoint = " << m1.isJoint() << endl;
 
-    Matrix<string> answer = m1.eequation();
+    Matrix<string> answer = m1.equation();
+
+    answer.echoo();
+
+    m1 = hilbertMatrixEquation(4);
+
+    answer = m1.equation();
 
     answer.echoo();
 

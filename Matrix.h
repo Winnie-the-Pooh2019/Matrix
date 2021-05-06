@@ -170,18 +170,7 @@ public:
         return changed[height - 1][height - 1];
     }
 
-    Matrix<T> equation() {
-        Matrix<T> transformed = gaussTransform();
-
-        Matrix<T> result = {1, height};
-
-        for (uint i = 0; i < height; i++)
-            result[i][0] = transformed[i][width - 1] / transformed[i][i];
-
-        return result;
-    }
-
-    Matrix<string> eequation() {
+    Matrix<string> equation() {
         Matrix<T> changed = gaussTransform();
         changed.zip();
 
@@ -221,6 +210,9 @@ public:
                                 answers[j][0] += " * x" + to_string(k + 1) + " ";
                             }
                         }
+
+                        if (answers[j][0] == "")
+                            answers[j][0] = "0";
                     }
 
                     cout << "!!! ANSWERS = " << answers[j][0] << endl;
@@ -353,11 +345,6 @@ public:
                     isLeft = values[i][j] != 0;
             }
 
-            // if (!(isLeft || isRight)) {
-            //     switcherH(i, height - 1);
-            //     resizeH(-1);
-            // }
-
             cout << "!!! !isLeft && isRight = " << (!isLeft && isRight) << endl;
             cout << "!!! last = " << (values[i][width - 1] != 0) << endl;
             echoo();
@@ -393,24 +380,8 @@ public:
                 resizeH(-1);
             }
         }
-
-        // notEmpty = false;
-
-        // for (uint j = 0; j < width; j++) {
-        //     for (uint i = 0; i < height; i++) {
-        //         if (values[i][j] != 0)
-        //             notEmpty = true;
-        //     }
-
-        //     if (!notEmpty) {
-        //         //switcherW(j, width - 1);
-        //         shiftRightWidth(j);
-        //         resizeW(-1);
-        //     }
-        // }
     }
 
-//private:
     void echoo() {
         for (uint i = 0; i < height; i++) {
             for (uint j = 0; j < width; j++) {
