@@ -9,6 +9,18 @@ typedef unsigned int uint;
 
 using namespace std;
 
+/**
+ * @author @Winnie-the-Pooh2019
+ * 
+ * email: gregsonjackk@gmail.com
+ */
+
+/**
+ * subsidiary type contains array
+ * of generic data
+ * 
+ * @tparam T 
+ */
 template<typename T>
 struct Iterator {
 public:
@@ -25,11 +37,25 @@ public:
         data = nullptr;
     }
 
+    /**
+     * @brief redefines operator []
+     * to simplify data access
+     * 
+     * @param index 
+     * @return T& 
+     */
     T& operator [] (const uint& index) {
         return data[index];
     }
 };
 
+/**
+ * @brief double-dimention array, contains 
+ * array of Iterator<T>, its capacity and capacity
+ * of each Iterator<T>.
+ * 
+ * @tparam T 
+ */
 template<typename T>
 struct Matrix {
 public:
@@ -37,6 +63,12 @@ public:
     uint width;
     uint height;
     
+    /**
+     * @brief Construct a new Matrix object
+     * 
+     * @param width 
+     * @param height 
+     */
     Matrix(uint width, uint height) {
         this->width = width;
         this->height = height;
@@ -48,12 +80,22 @@ public:
         }
     }
 
+    /**
+     * @brief empty construct a new Matrix object.
+     * Makes pointer @code nullptr and capacities 0
+     */
     Matrix() {
         width = 0;
         height = 0;
         values = nullptr;
     }
 
+    /**
+     * @brief Copy construct a Matrix object.
+     * Copies object by each element
+     * 
+     * @param original 
+     */
     Matrix(const Matrix<T>& original) {
         this->height = original.height;
         this->width = original.width;
@@ -68,6 +110,11 @@ public:
         }
     }
 
+    /**
+     * @brief Destroy the Matrix object.
+     * Clears data and makes pointer @code nullprt
+     * 
+     */
     ~Matrix() {
         if (values != nullptr) {
             for (uint i = 0; i < height; i++) {
@@ -80,6 +127,13 @@ public:
         values = nullptr;
     }
 
+    /**
+     * @brief Redefines @code operator=.
+     * Copies data to lvalue only of all capacity is equal.
+     * 
+     * @param source 
+     * @return Matrix<T>& 
+     */
     Matrix<T>& operator = (const Matrix<T>& source) {
         if (this == &source)
             return *this;
@@ -107,6 +161,12 @@ public:
         return *this;
     }
 
+    /**
+     * @brief redefines @code operator-. Makes every item
+     * a negative copy of it.
+     * 
+     * @return Matrix<T>& 
+     */
     Matrix<T>& operator - () {
         for (uint i = 0; i < height; i++) {
             for (uint j = 0; j < width; j++) {
@@ -117,30 +177,75 @@ public:
         return *this;
     }
 
+    /**
+     * @brief redefines @code operator+=.
+     * assigns the result of addition to @code *this
+     * 
+     * @param source 
+     * @return Matrix<T>& 
+     */
     Matrix<T>& operator += (Matrix<T>& source) {
         *this = *this + source;
         return *this;
     }
 
+    /**
+     * @brief redefines @code operator-=.
+     * assigns the result of substruction to @code *this
+     * 
+     * @param source 
+     * @return Matrix<T>& 
+     */
     Matrix<T>& operator -= (Matrix<T>& source) {
         *this = *this - source;
         return *this;
     }
 
+    /**
+     * @brief redefines @code operator-=.
+     * assign the result of matrix multiplication to @code *this
+     * 
+     * @param source 
+     * @return Matrix<T>& 
+     */
     Matrix<T>& operator *= (Matrix<T>& source) {
         *this = *this * source;
         return *this;
     }
 
+    /**
+     * @brief redefines @code operator-=.
+     * assign the result of multiplication generic item to matrix 
+     * to @code *this
+     * 
+     * @param source 
+     * @return Matrix<T>& 
+     */
     Matrix<T>& operator *= (const T& source) {
         *this = source * *this;
         return *this;
     }
 
+    /**
+     * @brief redefines @code operator[]
+     * 
+     * @param hindex 
+     * @return Iterator<T>& 
+     */
     Iterator<T>& operator [] (const uint& hindex) const {
         return values[hindex];
     }
 
+    /**
+     * @brief generate a matrix from double-dimention array
+     * 
+     * @param pointer 
+     * @param height 
+     * @param width 
+     * @return const Matrix<T>& 
+     * 
+     * @deprecated isn't tested
+     */
     static const Matrix<T>& fromArray(T** pointer, uint height, uint width) {
         Matrix<T> result = {width, height};
 
@@ -158,6 +263,15 @@ public:
         return result;
     }
 
+    /**
+     * @brief calculates a second-level determinant from this matrix
+     * 
+     * @param currentH 
+     * @param currentW 
+     * @param mainH 
+     * @param mainW 
+     * @return T 
+     */
     T minor(uint currentH, uint currentW, uint mainH, uint mainW) {
         if (currentH >= height || currentW >= width || mainH >= height || mainW >= width)
             return T();
@@ -165,6 +279,13 @@ public:
         return values[mainH][mainW] * values[currentH][currentW] - values[currentH][mainW] * values[mainH][currentW];
     }
 
+    /**
+     * @brief calculates a determinant of this matrix.
+     * Firstly checks if it is square. Then applies @code gaussTransform()
+     * to this matrix and takes the last element of transformed matrix.
+     * 
+     * @return T 
+     */
     T determinat() {
         if (height != width)
             return 0;
@@ -173,8 +294,17 @@ public:
         return changed[height - 1][height - 1];
     }
 
+    /**
+     * @brief It solves equation system. Transforms matrix by @code gaussTransform().
+     * Then it creates matrix of answers and put them there. If coefficient matrix isn't
+     * square or its determinant is 0, answer-vector contains free-variables. This method
+     * will put in answer-vector free-variable. Other variable will contain theese variables in.
+     * 
+     * @return Matrix<string> 
+     */
     Matrix<string> equation() {
         Matrix<T> changed = gaussTransform();
+        // changed.echoo();
         changed.zip();
 
         if (!changed.isJoint()) {
@@ -230,6 +360,14 @@ public:
         return answers;
     }
 
+    /**
+     * @brief supplies gaussTransform to this matrix. If determinant = 0
+     * returns empty matrix. In other way: to this matrix is added a identity matrix.
+     * Applies @code gaussTransform(). In source matrix will be identity matrix and 
+     * besides identity matrix will be a result
+     * 
+     * @return Matrix<T> 
+     */
     Matrix<T> negativeMatrix() {
         if (determinat() == 0)
             return {};
@@ -259,6 +397,12 @@ public:
         return r;
     }
 
+    /**
+     * @brief it applies to source matrix a Bareiss algorithm
+     * @link https://en.wikipedia.org/wiki/Bareiss_algorithm @endlink
+     * 
+     * @return Matrix<T> transformed matrix
+     */
     Matrix<T> gaussTransform() {
         Matrix<T> result = *this;
 
@@ -335,6 +479,12 @@ public:
         return result;
     }
 
+    /**
+     * @brief checks if matrix is joint 
+     * 
+     * @return true 
+     * @return false 
+     */
     bool isJoint() {
         bool result = true;
 
@@ -361,6 +511,9 @@ public:
         return result;
     }
 
+    /**
+     * @brief cuts zero-rows
+     */
     void zip() {
         // cout << "!!! in zip\n";
 
@@ -385,6 +538,9 @@ public:
         }
     }
 
+    /**
+     * @brief outputs matrix content
+     */
     void echoo() {
         for (uint i = 0; i < height; i++) {
             for (uint j = 0; j < width; j++) {
@@ -395,10 +551,25 @@ public:
         }
     }
 
+    /**
+     * @brief do @code resizeH() and @code resizeW() in a row
+     * 
+     * @param deltaH 
+     * @param deltaW 
+     * @return true if it is possible
+     * @return false if it isn't possible
+     */
     bool resize(uint deltaH, uint deltaW) {
         return resizeH(deltaH) && resizeW(deltaW);
     }
 
+    /**
+     * @brief increace height and adds new rows to the bottom of matrix
+     * 
+     * @param delta 
+     * @return true if it is possible
+     * @return false if it isn't possible
+     */
     bool resizeH(int delta) {
         if (delta + height <= 0 || delta == 0)
             return false;
@@ -423,6 +594,13 @@ public:
         return true;
     }
 
+    /**
+     * @brief increace width and adds new columns to the right side of matrix
+     * 
+     * @param delta 
+     * @return true if it is possible
+     * @return false if it isn't possible
+     */
     bool resizeW(int delta) {
         if (delta + width <= 0 || delta == 0)
             return false;
@@ -443,6 +621,14 @@ public:
         return true;
     }
 
+    /**
+     * @brief looks for a row containing not only nulls
+     * 
+     * @param h 
+     * @param w 
+     * @return int index of the first not-null row
+     * if it doesn't exist returns -1
+     */
     int findNotNullRow(uint h, uint w) {
         for (uint i = h + 1; i < height; i++) {
             if (values[i][w] != 0)
@@ -452,6 +638,12 @@ public:
         return -1;
     }
 
+    /**
+     * @brief swaps rows
+     * 
+     * @param row1 
+     * @param row2 
+     */
     void switcherH(uint row1, uint row2) {
         // cout << "!!! in switcherH !!!" << endl;
         T temp;
@@ -463,6 +655,12 @@ public:
         }
     }
 
+    /**
+     * @brief swaps columns
+     * 
+     * @param column1 
+     * @param column2 
+     */
     void switcherW(uint column1, uint column2) {
         T temp;
 
@@ -473,6 +671,12 @@ public:
         }
     }
 
+    /**
+     * @brief shifts columns filling empty space in middle and 
+     * frees space in the bottom for simple compression
+     * 
+     * @param nullColumn 
+     */
     void shiftRightWidth(uint nullColumn) {
         for (uint w = nullColumn + 1; w < width; w++) {
             for (uint h = 0; h < height; h++) {
@@ -482,6 +686,14 @@ public:
     }
 };
 
+/**
+ * @brief redefines @code operator+. Adds one matrix to another
+ * 
+ * @tparam T 
+ * @param left 
+ * @param right 
+ * @return Matrix<T> 
+ */
 template<typename T>
 Matrix<T> operator + (Matrix<T>& left, Matrix<T>& right) {
     Matrix<T> result = {};
@@ -501,11 +713,29 @@ Matrix<T> operator + (Matrix<T>& left, Matrix<T>& right) {
     return result;
 }
 
+/**
+ * @brief redefines @code operator-. Substract one matrix from another
+ * by using unary @code oprator- and @code operator+
+ * 
+ * @tparam T 
+ * @param left 
+ * @param right 
+ * @return Matrix<T> 
+ */
 template<typename T>
 Matrix<T> operator - (Matrix<T>& left, Matrix<T>& right) {
     return left + (-right);
 }
 
+/**
+ * @brief redefines @code oprator* for an item and a matrix.
+ * It multiplicates an item to each matrix members
+ * 
+ * @tparam T 
+ * @param item 
+ * @param matrix 
+ * @return Matrix<T> 
+ */
 template<typename T>
 Matrix<T> operator * (T&& item, Matrix<T>& matrix) {
     Matrix<T> result = {matrix.width, matrix.height};
@@ -517,6 +747,15 @@ Matrix<T> operator * (T&& item, Matrix<T>& matrix) {
     return result;
 }
 
+/**
+ * @brief redefines @code oprator* for an item and a matrix.
+ * It multiplicates an item to each matrix members
+ * 
+ * @tparam T 
+ * @param item 
+ * @param matrix 
+ * @return Matrix<T> 
+ */
 template<typename T>
 Matrix<T> operator * (const T& item, Matrix<T>& matrix) {
     Matrix<T> result = {matrix.width, matrix.height};
@@ -529,6 +768,15 @@ Matrix<T> operator * (const T& item, Matrix<T>& matrix) {
     return result;
 }
 
+/**
+ * @brief redefines @code oprator* for 2 matrixes
+ * It multiplicates if only left's columns count is equal to right's rows count
+ * 
+ * @tparam T 
+ * @param left 
+ * @param right 
+ * @return Matrix<T> 
+ */
 template<typename T>
 Matrix<T> operator * (Matrix<T>& left, Matrix<T>& right) {
     if (left.width != right.height)

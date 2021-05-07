@@ -2,6 +2,11 @@
 #include <fstream>
 #include <ctime>
 
+/**
+ * @brief dont watch this :)
+ * even i don't know WHAT it is
+ * 
+ */
 struct Logger {
 private:
     std::ofstream logger;
