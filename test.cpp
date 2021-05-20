@@ -43,7 +43,7 @@ void excep(Matrix<double>& equation) {
     a.resizeW(-1);
     Matrix<string> sanswers = equation.equation();
     
-    //sanswers.echoo();
+    sanswers.echoo();
 
     if (a.determinat() != 0) {
         Matrix<double> answers = {sanswers.width, sanswers.height};
@@ -168,7 +168,7 @@ int main() {
 
 
     // forth matrix
-    cout << "\nDEGERATIVE MATRIX\n";
+    cout << "\nDEGENERATIVE MATRIX\n";
     ex = {4, 3};
     ex[0][0] = 1; ex[0][1] = 1; ex[0][2] = -1; ex[0][3] = 1;
     ex[1][0] = 2; ex[1][1] = -1; ex[1][2] = 5; ex[1][3] = 3;
@@ -226,6 +226,45 @@ int main() {
     }
     else {
         cout << "\nnegative matrix doesn't exist\n";
+    }
+
+    cout << "!!! Do u want to sugest ur task? y/n\n";
+
+    char answer;
+    cin >> answer;
+
+    if (answer == 'y') {
+        cout << "!!! What type of issue do u wanna do? e/d/n\n";
+
+        cin >> answer;
+
+        uint n, m;
+        cout << "Input height and width of matrix\n";
+        cin >> n >> m;
+        Matrix<double> matrix = {m, n};
+
+        for (uint i = 0; i < n; i++) {
+            cout << "Input " << m << " numbers in a row: ";
+
+            for (uint j = 0; j < m; j++) {
+                cin >> matrix[i][j];
+            }
+        }
+
+        if (answer == 'e') {
+            excep(matrix);
+        }
+        else if (answer == 'd') {
+            double det = matrix.determinat();
+            cout << "Determinant = " << det << endl;
+        }
+        else if (answer == 'n') {
+            matrix = matrix.negativeMatrix();
+            matrix.echoo();
+        }
+        else {
+            cout << "incorrect answer\n";
+        }
     }
 
     return 0;

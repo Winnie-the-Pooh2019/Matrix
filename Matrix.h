@@ -401,6 +401,10 @@ public:
      * @brief it applies to source matrix a Bareiss algorithm
      * @link https://en.wikipedia.org/wiki/Bareiss_algorithm @endlink
      * 
+     * 7 9 6 
+     * 4 3 6
+     * 1 0 3
+     * 
      * @return Matrix<T> transformed matrix
      */
     Matrix<T> gaussTransform() {
